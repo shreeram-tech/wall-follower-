@@ -1,0 +1,87 @@
+// ==================== SAME-SIDE PIN MAPPING ====================
+// All assigned exclusively to the power/GND side of the ESP32 board
+const int ENA = 13; // Left Motor PWM speed
+const int IN1 = 12; // Left Motor Direction 1
+const int IN2 = 14; // Left Motor Direction 2
+const int IN3 = 27; // Right Motor Direction 1
+const int IN4 = 26; // Right Motor Direction 2
+const int ENB = 25; // Right Motor PWM speed
+
+// ==================== TEST CONSTANTS ====================
+const int TEST_SPEED = 180;
+
+// ESP32 PWM Configuration
+const int freq = 30000;
+const int ledChannelA = 0;
+const int ledChannelB = 1;
+const int resolution = 8;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Same-Side Motor Test Initialized...");
+
+  // Set motor control pins as outputs
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Configure ESP32 PWM channels
+  ledcSetup(ledChannelA, freq, resolution);
+  ledcSetup(ledChannelB, freq, resolution);
+  ledcAttachPin(ENA, ledChannelA);
+  ledcAttachPin(ENB, ledChannelB);
+}
+
+void loop() {
+  // Test 1: Move Forward for 2 seconds
+  Serial.println("Motors: Moving Forward");
+  setMotors(TEST_SPEED, TEST_SPEED);
+  delay(2000);
+
+  // Test 2: Stop for 1 second
+  Serial.println("Motors: Stopping");
+  setMotors(0, 0);
+  delay(1000);
+
+  // Test 3: Move Backward for 2 seconds
+  Serial.println("Motors: Moving Backward");
+  setMotors(-TEST_SPEED, -TEST_SPEED);
+  delay(2000);
+
+  // Test 4: Stop for 1 second
+  Serial.println("Motors: Stopping");
+  setMotors(0, 0);
+  delay(1000);
+}
+
+// Helper function to drive motors (+ for forward, - for backward)
+void setMotors(int leftSpeed, int rightSpeed) {
+  if (leftSpeed > 0) {
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    ledcWrite(ledChannelA, leftSpeed);
+  } else if (leftSpeed < 0) {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    ledcWrite(ledChannelA, abs(leftSpeed));
+  } else {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    ledcWrite(ledChannelA, 0);
+  }
+
+  if (rightSpeed > 0) {
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+    ledcWrite(ledChannelB, rightSpeed);
+  } else if (rightSpeed < 0) {
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+    ledcWrite(ledChannelB, abs(rightSpeed));
+  } else {
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+    ledcWrite(ledChannelB, 0);
+  }
+}
