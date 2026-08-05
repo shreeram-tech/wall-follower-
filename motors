@@ -1,5 +1,5 @@
 // ==================== SAME-SIDE PIN MAPPING ====================
-// All assigned exclusively to the power/GND side of the ESP32 board
+// Assigned exclusively to the power/GND side of the ESP32 board
 const int ENA = 13; // Left Motor PWM speed
 const int IN1 = 12; // Left Motor Direction 1
 const int IN2 = 14; // Left Motor Direction 2
@@ -9,16 +9,12 @@ const int ENB = 25; // Right Motor PWM speed
 
 // ==================== TEST CONSTANTS ====================
 const int TEST_SPEED = 180;
-
-// ESP32 PWM Configuration
 const int freq = 30000;
-const int ledChannelA = 0;
-const int ledChannelB = 1;
 const int resolution = 8;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Same-Side Motor Test Initialized...");
+  Serial.println("Full Motion Motor Test Initialized...");
 
   // Set motor control pins as outputs
   pinMode(IN1, OUTPUT);
@@ -26,62 +22,77 @@ void setup() {
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
-  // Configure ESP32 PWM channels
-  ledcSetup(ledChannelA, freq, resolution);
-  ledcSetup(ledChannelB, freq, resolution);
-  ledcAttachPin(ENA, ledChannelA);
-  ledcAttachPin(ENB, ledChannelB);
+  // New ESP32 Core v3.x PWM Attachment Syntax
+  ledcAttach(ENA, freq, resolution);
+  ledcAttach(ENB, freq, resolution);
 }
 
 void loop() {
-  // Test 1: Move Forward for 2 seconds
-  Serial.println("Motors: Moving Forward");
+  // 1. Move Forward
+  Serial.println("Motion: Moving Forward");
   setMotors(TEST_SPEED, TEST_SPEED);
   delay(2000);
 
-  // Test 2: Stop for 1 second
-  Serial.println("Motors: Stopping");
+  // Stop briefly between tests
   setMotors(0, 0);
-  delay(1000);
+  delay(500);
 
-  // Test 3: Move Backward for 2 seconds
-  Serial.println("Motors: Moving Backward");
+  // 2. Move Backward
+  Serial.println("Motion: Moving Backward");
   setMotors(-TEST_SPEED, -TEST_SPEED);
   delay(2000);
 
-  // Test 4: Stop for 1 second
-  Serial.println("Motors: Stopping");
   setMotors(0, 0);
-  delay(1000);
+  delay(500);
+
+  // 3. Turn Left 
+  Serial.println("Motion: Turning Left");
+  setMotors(-TEST_SPEED, TEST_SPEED);
+  delay(1500);
+
+  setMotors(0, 0);
+  delay(500);
+
+  // 4. Turn Right 
+  Serial.println("Motion: Turning Right");
+  setMotors(TEST_SPEED, -TEST_SPEED);
+  delay(1500);
+
+  // Stop before restarting the loop
+  Serial.println("Motion: Stopping for 2 seconds...");
+  setMotors(0, 0);
+  delay(2000);
 }
 
-// Helper function to drive motors (+ for forward, - for backward)
+// ==================== MOTOR CONTROL FUNCTION ====================
 void setMotors(int leftSpeed, int rightSpeed) {
+  // Left Motor Control
   if (leftSpeed > 0) {
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
-    ledcWrite(ledChannelA, leftSpeed);
+    ledcWrite(ENA, leftSpeed);
   } else if (leftSpeed < 0) {
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
-    ledcWrite(ledChannelA, abs(leftSpeed));
+    ledcWrite(ENA, abs(leftSpeed));
   } else {
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, LOW);
-    ledcWrite(ledChannelA, 0);
+    ledcWrite(ENA, 0);
   }
 
+  // Right Motor Control
   if (rightSpeed > 0) {
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
-    ledcWrite(ledChannelB, rightSpeed);
+    ledcWrite(ENB, rightSpeed);
   } else if (rightSpeed < 0) {
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    ledcWrite(ledChannelB, abs(rightSpeed));
+    ledcWrite(ENB, abs(rightSpeed));
   } else {
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, LOW);
-    ledcWrite(ledChannelB, 0);
+    ledcWrite(ENB, 0);
   }
 }
