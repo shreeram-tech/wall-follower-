@@ -1,0 +1,37 @@
+// Define the GPIO pins connected to your 3 IR sensors
+const int irLeftPin = 13;
+const int irCenterPin = 12;
+const int irRightPin = 14;
+
+void setup() {
+  // Start the Serial Monitor
+  Serial.begin(115200);
+  
+  // Configure IR sensor pins as inputs
+  pinMode(irLeftPin, INPUT);
+  pinMode(irCenterPin, INPUT);
+  pinMode(irRightPin, INPUT);
+  
+  Serial.println("IR Sensor Test Initialized...");
+}
+
+void loop() {
+  // Read the digital state of each sensor
+  int leftState = digitalRead(irLeftPin);
+  int centerState = digitalRead(irCenterPin);
+  int rightState = digitalRead(irRightPin);
+
+  // Print the status to the Serial Monitor
+  // Note: Most digital IR modules output LOW when an object/wall is detected, and HIGH when clear.
+  Serial.print("Left: ");
+  Serial.print(leftState == LOW ? "DETECTED " : "Clear    ");
+  
+  Serial.print("\tCenter: ");
+  Serial.print(centerState == LOW ? "DETECTED " : "Clear    ");
+  
+  Serial.print("\tRight: ");
+  Serial.println(rightState == LOW ? "DETECTED" : "Clear");
+
+  // Small delay to keep the Serial Monitor readable
+  delay(200);
+}
